@@ -1,0 +1,1 @@
+const {execFileSync}=require('node:child_process');const fs=require('node:fs');for(const f of fs.readdirSync('src').filter(x=>x.endsWith('.js')))execFileSync(process.execPath,['--check','src/'+f],{stdio:'inherit'});console.log('JavaScript syntax checked; semantic lint pending.');
