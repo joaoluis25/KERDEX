@@ -1,0 +1,12 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+const context={window:{},URL,console};context.window=context;vm.createContext(context);
+for(const f of ['finance','i18n','ui'])vm.runInContext(fs.readFileSync(`src/${f}.js`,'utf8'),context);
+const F=context.KX.Finance;
+test('exact cents and invalid amounts',()=>{assert.equal(F.parseCents('0.10')+F.parseCents('0.20'),30);for(const x of ['-1','Infinity','1.001','','1e4'])assert.equal(F.parseCents(x),null);assert.equal(F.parseCents('1,25'),125)});
+test('monthly isolation, edits and signed net',()=>{const tx=[{cents:10,type:'income',date:'2026-10-01'},{cents:20,type:'income',date:'2026-10-20'},{cents:100,type:'expense',date:'2026-09-01'}];assert.equal(F.totals(tx,'2026-10').net,30);tx[0].cents=1;assert.equal(F.totals(tx,'2026-10').net,21);assert.equal(F.totals(tx,'2026-09').net,-100)});
+test('calendar dates and month boundaries',()=>{assert.equal(F.validateDate('2024-02-29'),true);assert.equal(F.validateDate('2026-02-29'),false);assert.equal(F.monthShift('2026-01',-1),'2025-12');assert.equal(F.monthShift('2026-12',1),'2027-01')});
+test('goals, zero contribution, excess and extremes',()=>{assert.equal(F.monthsToGoal(0,100,0),null);assert.equal(F.monthsToGoal(101,100,0),0);assert.equal(F.monthsToGoal(0,101,10),11);assert.equal(F.progress(150,100),100);assert.equal(F.progress(0,0),0);assert.equal(F.projectedLabel(0,100000000000,1),'—')});
+test('installments include explicit costs',()=>{assert.equal(F.installmentTotal(11000,10,2000),112000);assert.equal(F.installmentTotal(10,0),null);assert.equal(F.installmentTotal(10,1.5),null)});
+test('public product links only, no fetch or secrets',()=>{assert.equal(F.safeProductURL('https://example.com/product?q=1'),true);for(const x of ['javascript:alert(1)','http://example.com','https://127.0.0.1/','https://[::1]/','https://localhost','https://a.internal','https://user:pass@example.com','https://example.com:8080'])assert.equal(F.safeProductURL(x),false,x)});
+test('user strings escaped in HTML',()=>{assert.equal(context.KX.UI.escape('<img src=x onerror="alert(1)">'),'&lt;img src=x onerror=&quot;alert(1)&quot;&gt;')});
+test('all locales have the same interface keys',()=>{const locales=context.KX.locales;for(const locale of ['en-US','es-ES'])assert.deepEqual(Object.keys(locales[locale]).sort(),Object.keys(locales['pt-BR']).sort())});

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+.env
+*.log
+
+# Credenciais locais nunca devem entrar no Git.
+.env.*
+!.env.example
+*.pem
+*.key
