@@ -25,11 +25,11 @@ function demoSeed(){
       tx.push({id:id++,name,cents:Math.round(amount*multiplier),type,category,date:F.dateISO(new Date(stamp.getFullYear(),stamp.getMonth(),day))});
     }
   }
-  return {transactions:tx,purchases:[{id:101,name:'Notebook para estudos',cents:460000,saved:140000,monthly:55000,priority:'high'},{id:102,name:'Novo smartphone',cents:280000,saved:72000,monthly:30000,priority:'medium'}],goals:[{id:201,name:'Reserva de emergência',cents:1500000,saved:625000},{id:202,name:'Viagem especial',cents:600000,saved:248000}]};
+  return {transactions:tx,purchases:[{id:101,name:'Notebook para estudos',cents:460000,saved:140000,monthly:55000,priority:'high'},{id:102,name:'Novo smartphone',cents:280000,saved:72000,monthly:30000,priority:'medium'}],goals:[{id:201,name:'Reserva de emergência',cents:1500000,saved:625000,priority:'high'},{id:202,name:'Viagem especial',cents:600000,saved:248000,priority:'medium'}]};
 }
-function checkTransaction(x){return x&&(!x.deadline||F.validateDate(x.deadline))&&Number.isSafeInteger(x.id)&&typeof x.name==='string'&&x.name.length<=80&&safeInteger(x.cents)&&x.cents>0&&['income','expense'].includes(x.type)&&CATEGORIES.includes(x.category)&&F.validateDate(x.date);}
-function checkPurchase(x){return x&&(!x.url||F.safeProductURL(x.url))&&(!x.deadline||F.validateDate(x.deadline))&&Number.isSafeInteger(x.id)&&typeof x.name==='string'&&x.name.length<=80&&safeInteger(x.cents)&&x.cents>0&&safeInteger(x.saved)&&safeInteger(x.saved)&&safeInteger(x.monthly)&&['high','medium','low'].includes(x.priority);}
-function checkGoal(x){return x&&(!x.deadline||F.validateDate(x.deadline))&&Number.isSafeInteger(x.id)&&typeof x.name==='string'&&x.name.length<=80&&safeInteger(x.cents)&&x.cents>0&&safeInteger(x.saved)&&safeInteger(x.saved);}
+function checkTransaction(x){return x&&Number.isSafeInteger(x.id)&&typeof x.name==='string'&&x.name.length<=80&&safeInteger(x.cents)&&x.cents>0&&['income','expense'].includes(x.type)&&CATEGORIES.includes(x.category)&&F.validateDate(x.date);}
+function checkPurchase(x){return x&&Number.isSafeInteger(x.id)&&typeof x.name==='string'&&x.name.length<=80&&safeInteger(x.cents)&&x.cents>0&&safeInteger(x.saved)&&x.saved<=x.cents&&safeInteger(x.monthly)&&['high','medium','low'].includes(x.priority);}
+function checkGoal(x){return x&&Number.isSafeInteger(x.id)&&typeof x.name==='string'&&x.name.length<=80&&safeInteger(x.cents)&&x.cents>0&&safeInteger(x.saved)&&x.saved<=x.cents&&(!x.priority||['high','medium','low'].includes(x.priority));}
 function parseStoredData(){
   try{
     const data=JSON.parse(localStorage.getItem(DEMO_KEY)||'null');
@@ -50,7 +50,7 @@ const persisted={
 KX.state={
   page:'home',month:F.monthKey(new Date()),...persisted,
   ...((persisted.remember?parseStoredData():null)||demoSeed()),
-  financeQuery:'',financeType:'all',financeSort:'newest',modal:null,menuOpen:false
+  financeQuery:'',financeType:'all',modal:null,menuOpen:false
 };
 KX.Store={
   seed:demoSeed,
@@ -60,7 +60,8 @@ KX.Store={
       localStorage.setItem(PREF_KEY,JSON.stringify({locale:s.locale,theme:s.theme,compact:s.compact,remember:s.remember,widgets:s.widgets}));
       if(s.remember)localStorage.setItem(DEMO_KEY,JSON.stringify({transactions:s.transactions,purchases:s.purchases,goals:s.goals}));
       else localStorage.removeItem(DEMO_KEY);
-    }catch{KX.storageFailed=true;s.remember=false;}
+      KX.Features?.persist?.();
+    }catch(e){console.warn('Local demo storage unavailable.',e);}
   },
   reset(){Object.assign(KX.state,demoSeed());this.persist();},
   add(kind,item){const key={transaction:'transactions',purchase:'purchases',goal:'goals'}[kind];if(!key)throw Error('Invalid demo collection');KX.state[key].push({...item,id:Date.now()+Math.floor(Math.random()*100000)});this.persist();},

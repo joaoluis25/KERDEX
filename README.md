@@ -1,50 +1,66 @@
-# KERDEX Beta 2.0
+# KERDEX — Beta 3.0 (protótipo demonstrativo)
 
-Inteligência para evoluir. Demonstração interativa de planejamento financeiro, baseada nos protótipos do pacote fornecido pelo proprietário.
+**Inteligência para evoluir.** Aplicação web para experimentar orçamento, compras, metas, portfólio global de ativos com valores manuais, KERDEX News com fontes atribuídas e simulações em oito moedas.
 
-## Executar
+> **Não insira dados reais de bancos, investimentos ou informações financeiras pessoais.** Este protótipo NÃO tem login, backend de usuários, banco de dados privado ou auditoria independente. Preços, posições e transações iniciais são fictícios. Não há corretagem, custódia, execução de ordens, indicação personalizada de ativos ou IA preditiva.
 
-Node.js 24 e npm. No diretório `/workspace/KERDEX`:
+## Abrir do jeito mais fácil — Windows 11
 
-```sh
-npm ci
-npm run dev
+1. Baixe `KERDEX_BETA_3_0_PREVIA_OFFLINE.html` (arquivo separado, entregue ao lado deste ZIP).
+2. Dê dois cliques no arquivo para abrir no Chrome ou Edge. Não precisa instalar nada.
+3. Nessa prévia, os recursos e relatórios locais funcionam; **KERDEX News e consulta de câmbio externo não funcionam offline**.
+
+## Abrir o projeto completo no Windows 11
+
+1. Instale Node.js 20 ou posterior (Node 24 LTS é compatível) em https://nodejs.org/.
+2. Extraia o ZIP em uma pasta nova (por exemplo `Documentos\\KERDEX_BETA_3_0`). Não sobrescreva a versão antiga.
+3. Dê dois cliques em `INICIAR_KERDEX_WINDOWS.bat`. O servidor abre em **http://localhost:3001**.
+4. Ou abra a pasta extraída no VS Code (**Arquivo > Abrir Pasta**), Terminal > Novo Terminal, e execute `node tools/server.cjs`. Não precisa de `npm ci`: o projeto não depende de pacotes externos para rodar.
+5. Para desligar, feche a janela do servidor ou pressione `Ctrl+C`.
+
+Se a porta 3001 já estiver ocupada, escolha uma porta diferente via CMD: `set PORT=3002 && node tools/server.cjs`, acesse http://localhost:3002. Se o PowerShell bloquear `npm.ps1`, use `npm.cmd run dev` ou diretamente `node tools/server.cjs`.
+
+## Verificações locais
+
+Em um terminal na pasta do projeto:
+
+```bat
+npm.cmd test
+npm.cmd run check
+npm.cmd run build
 ```
 
-O servidor usa a porta 3000 (sobrescreva com `PORT`). Não requer conta, segredo, banco ou serviço externo. É servidor de desenvolvimento, não hospedagem de produção.
+Os testes automatizados verificam modelos financeiros, validações, carteiras e interpretação de RSS. Verificações visuais exploratórias de desktop e celular foram feitas em Chromium; **não constituem teste exaustivo de segurança nem WCAG 2.2 AA**.
 
-```sh
-npm run lint
-npm run typecheck
-npm test
-npm run test:e2e
-npm run build
-```
+## Módulos já demonstráveis
 
-E2E usa Chromium instalado em `/usr/bin/chromium`; defina `CHROMIUM_PATH` para outro executável. `dist/` contém o site estático para hospedagem com os cabeçalhos apropriados. O comando lint verifica sintaxe; a checagem TypeScript cobre o módulo financeiro, não toda a interface legada.
+- Landing page, dashboard, registro/edição/exclusão de receitas e despesas, categorias e períodos.
+- Planejamento de compras com valores, prioridades e estimativas, sem captura automática de preço.
+- Metas financeiras com prioridade baixa, média ou alta.
+- Carteira de investimentos: ações BR/externas, ETFs, FIIs, REITs, renda fixa, fundos, cripto, commodities, caixa e outros; posições editáveis, preços e câmbio **manuais**, classificação, alocação, valor de mercado, resultado **não realizado**, dividendos registrados e CSV.
+- **KERDEX News**: resumo em layout editorial próprio, com filtragem por temas e regras de relevância ligadas aos ativos cadastrados. No servidor local ele tenta buscar manchetes oficiais do Banco Central Europeu e do Federal Reserve, além de metadados de manchetes globais pelo serviço público GDELT DOC 2.0 quando disponível. Se não houver dados reais, a interface mostra indisponibilidade, sem inventar notícias. A classificação **não usa IA generativa neste protótipo**. Manchetes de terceiros são exibidas no idioma original, identificadas como tal.
+- **Laboratório de Cenários**: juros compostos, metas de acumulação, financiamento (Price/SAC), aporte extra, inflação, taxas, imposto ilustrativo, cenários conservador/base/otimista, horizonte de até 480 meses e oito moedas (BRL, USD, EUR, GBP, JPY, CAD, CHF, AUD).
+- **Exportação** de cenários para CSV, arquivo Excel XLSX editável, slides PowerPoint PPTX editáveis e relatório para impressão / salvar como PDF pelo navegador. Relatórios são projeções condicionadas às hipóteses do usuário, não análise real de preços de mercado.
+- PT-BR, inglês e espanhol para interface, formulários e seções de marketing; temas claro e escuro; controles de personalização e salvamento local **opcional**, sem compartilhamento em nuvem.
 
-## Funcional nesta entrega
+## Moedas, cotações e precisão
 
-Home, dashboard mensal, histórico de seis meses do dataset fictício, CRUD de movimentações/compras/metas, pesquisa, filtros, ordenação, link manual de produto, prazo opcional, simulador de poupança e comparação nominal de parcelas com custos explícitos. Idiomas PT/EN/ES, temas, widgets e densidade ajustáveis. Navegação por hash com histórico do navegador.
+- O orçamento do protótipo permanece em BRL; o Laboratório permite definir a moeda dos valores de entrada e mostra o resultado nessa moeda.
+- A carteira converte valores para BRL usando **taxa cambial informada manualmente**, com campos separados para câmbio histórico de aquisição e câmbio atual. O retorno do investimento não deve ser interpretado como exato quando os custos, impostos e datas de entrada são incompletos.
+- A opção de consultar câmbio tenta obter uma **taxa de referência diária**, não taxa negociável/ao vivo, via Frankfurter (requer servidor local, conexão e serviço disponível). Nem o valor de referência nem o simulador modelam custos reais de remessa e câmbio futuro.
+- O simulador usa cálculos em ponto flutuante com arredondamentos para apresentação; **não** substitui planilha atuarial, cálculo bancário contratual, cálculo tributário nem motor contábil auditado.
+- Transações da carteira não são contabilizadas automaticamente como despesas do orçamento (evita dupla contagem); integração contábil real fica para versões futuras.
 
-Todos os registros são fictícios. Por padrão, alterações ficam apenas na memória e somem ao recarregar. Preferências ficam neste navegador; ativar armazenamento de demonstração guarda registros fictícios no localStorage. Revogar apaga os registros persistidos. Não coloque dados pessoais ou financeiros reais.
+## Segurança e limitações
 
-## Limitações
+O servidor Node é **apenas de desenvolvimento local** e não está preparado para exposição pública: não há autenticação, autorização, registro de auditoria nem garantia de confidencialidade. Escuta `127.0.0.1` por padrão, usa allowlist de arquivos/URLs, valida moedas externas, fornece CSP e cabeçalhos básicos e não solicita segredos, mas isso **não o torna seguro para dados reais**. Para divulgação estática pode-se publicar `dist/`, mas notícias e consulta de câmbio não funcionarão sem API implantada separadamente.
 
-Não há backend, autenticação, isolamento entre usuários, banco, nuvem de dados, Open Finance, IA, ordens, notícias ou cotações integradas. Radar Global informa indisponibilidade e aponta uma fonte oficial. Links de produtos são manuais: não há captura de preço, scraping ou fetch de URL. A validação de URL não substitui proteção SSRF de um futuro servidor.
+Sem conexão bancária, dados reais licenciados de bolsa, execução de ordens, API de corretoras, sistema de recomendação regulado, IA generativa ou motor de comparações comerciais. Não confunda demonstração com disponibilidade comercial. Consulte `docs/SEGURANCA.md` e `docs/ROADMAP.md`.
 
-Não representa a conclusão de todos os requisitos P0 do documento mestre: migração completa para componentes tipados, SSR/SSG, exportação, cobertura e2e de todos os casos, auditoria manual com leitor de tela e medição de Core Web Vitals permanecem pendentes. Veja `docs/TESTES_E_ACEITE.md` e roadmap.
+## Identidade
 
-## Uso
+Usa símbolos e ícones inspirados na imagem de branding fornecida pelo proprietário do projeto, paleta verde institucional, navegação profissional e layouts adaptativos. O logotipo comercial final, direitos e eventuais registros da marca ainda precisam ser validados antes da comercialização.
 
-Explore a demonstração na home. Em Finanças, escolha o mês e adicione uma movimentação; a data determina o período. Use os ícones com rótulos acessíveis para editar/excluir. Compras aceita preço estimado, reserva, aporte e link opcional; aporte zero significa prazo indeterminado. Metas admite excedente sem apagá-lo e limita a barra visual a 100%. Em Preferências, configure idioma, tema e retenção. Reset restaura os exemplos, preservando preferências.
+## Desenvolver sem misturar versões
 
-## Migração e origem
-
-Reaproveitados HTML, design tokens, ativos derivados do board, dicionários e módulos do Beta 2 parcial; Beta 1 consultado para comparação. Legado original e documentos de escopo preservados em `docs/insumos/`. Decisões e achados: `docs/AUDITORIA_LEGADO.md` e `docs/DECISOES_ARQUITETURA.md`. Alterações do projeto foram autorizadas pelo pedido explícito de montagem; não são alterações necessárias apenas ao onboarding.
-
-Código sob LICENSE do repositório. Ativos KERDEX fornecidos pelo usuário, usados como referência autorizada neste protótipo; não se presume autorização para redistribuição de marcas de terceiros.
-
-## Download e Windows 11
-
-Instruções de instalação, execução no Windows e preservação no GitHub privado: [docs/EXECUTAR_NO_WINDOWS_11.md](docs/EXECUTAR_NO_WINDOWS_11.md). O pacote de entrega inclui um bundle Git para preservar o histórico local.
+Mantenha este diretório separado do Beta 2.0 até aprovar o funcionamento. Depois, abra uma branch de Git dedicada (`beta-3.0`) e revise os arquivos antes de combinar com a principal. **Não apague o repositório nem faça `git push --force`.** Veja `docs/AUDITORIA.md`.

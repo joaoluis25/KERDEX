@@ -1,12 +1,6 @@
 /** Financial calculation functions. Monetary values are integer centavos (BRL). */
 window.KX = window.KX || {};
 KX.Finance = Object.freeze({
-  safeProductURL(value) {
-    try { const u=new URL(value); const h=u.hostname.toLowerCase();
-      return u.protocol==='https:'&&!u.username&&!u.password&&!u.port&&h.includes('.')&&!/^[\d.]+$/.test(h)&&!h.includes(':')&&!/(^|\.)(localhost|local|internal|test|invalid)$/.test(h)&&value.length<=2048;
-    } catch { return false; }
-  },
-  installmentTotal(payment,count,fees=0) { if(!Number.isSafeInteger(payment)||payment<0||!Number.isInteger(count)||count<1||count>600||!Number.isSafeInteger(fees)||fees<0) return null; const total=payment*count+fees; return Number.isSafeInteger(total)?total:null; },
   parseCents(value) {
     // HTML type=number submits ASCII decimals regardless of visual locale.
     const text = String(value ?? '').trim().replace(',', '.');
@@ -49,7 +43,7 @@ KX.Finance = Object.freeze({
     if(months===null)return null;
     const now=new Date();
     const d=new Date(now.getFullYear(),now.getMonth()+months,1);
-    return Number.isFinite(d.getTime())&&d.getFullYear()<=9999?new Intl.DateTimeFormat(locale,{month:'short',year:'numeric'}).format(d):'—';
+    return new Intl.DateTimeFormat(locale,{month:'short',year:'numeric'}).format(d);
   },
   categoryTotals(transactions,month){
     const map=new Map();
